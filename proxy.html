@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UV Proxy</title>
+  <script src="./rewriter.js"></script>
+</head>
+<body>
+  <script>
+    const url = new URLSearchParams(location.search).get('url');
+    if (!url) {
+      document.body.innerHTML = '<p>No URL specified.</p>';
+    } else {
+      fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const rewritten = rewriteHTML(html, url);
+          document.write(rewritten);
+        });
+    }
+  </script>
+</body>
+</html>
