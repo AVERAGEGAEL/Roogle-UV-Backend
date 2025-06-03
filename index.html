@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
     <title>Roogle UV Backend</title>
-    <script src="/uv.bundle.js" defer></script>
-    <script src="/uv.config.js" defer></script>
+    <script src="uv.bundle.js"></script>
+    <script src="uv.config.js"></script>
   </head>
   <body>
-    <h2>Ultraviolet Backend Ready</h2>
-    <p>This is the UV proxy backend for Roogle.</p>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const target = urlParams.get("url");
+
+      if (!target) {
+        document.body.innerHTML = '<h2>Missing ?url= parameter</h2>';
+      } else {
+        const proxyUrl = __uv$config.prefix + __uv$config.encodeUrl(target);
+        location.href = proxyUrl;
+      }
+    </script>
   </body>
 </html>
