@@ -1,19 +1,15 @@
-// uv.bundle.js
-(async () => {
-  const config = self.__uv$config;
-  const searchParams = new URLSearchParams(window.location.search);
-  const encodedUrl = searchParams.get('url');
+self.Ultraviolet = {
+  codec: {
+    xor: {
+      encode(url) {
+        return btoa(url.split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ 2)).join(''));
+      },
+      decode(url) {
+        return atob(url).split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ 2)).join('');
+      },
+    }
+  },
+};
 
-  if (!encodedUrl) {
-    document.body.innerHTML = '<h2>Error: No URL provided.</h2>';
-    return;
-  }
-
-  const decodedUrl = config.decodeUrl(encodedUrl);
-  const iframe = document.createElement('iframe');
-
-  iframe.src = config.prefix + encodedUrl;
-  iframe.style = 'width:100%; height:100vh; border:none;';
-  document.body.style.margin = '0';
-  document.body.appendChild(iframe);
-})();
+// UV Service Handler stub (needed so things don't break)
+if (!self.addEventListener) self.addEventListener = () => {};
