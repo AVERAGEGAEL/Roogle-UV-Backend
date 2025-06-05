@@ -42,7 +42,7 @@
 
       // Register service worker (required!)
       try {
-        await navigator.serviceWorker.register('uv.sw.js', {
+        await navigator.serviceWorker.regster('uv.sw.js', {
           scope: __uv$config.prefix,
         });
       } catch (e) {
