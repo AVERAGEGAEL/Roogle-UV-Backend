@@ -8,3 +8,4 @@ self.__uv$config = {
     config: '/uv.config.js',
     sw: '/uv.sw.js',
 };
+// rebuild trigger
