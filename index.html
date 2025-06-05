@@ -40,11 +40,9 @@
         return;
       }
 
-      // Register service worker (required!)
+      // ✅ Register UV service worker the correct way
       try {
-        await navigator.serviceWorker.register('uv.sw.js', {
-          scope: __uv$config.prefix,
-        });
+        await Ultraviolet.sw.register();
       } catch (e) {
         document.body.innerHTML = '<h2>❗ Failed to register service worker.</h2><pre>' + e + '</pre>';
         return;
