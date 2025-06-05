@@ -40,7 +40,7 @@
         return;
       }
 
-      // ✅ Register UV service worker the correct way
+      // Register service worker BEFORE init
       try {
         await Ultraviolet.sw.register();
       } catch (e) {
@@ -48,14 +48,16 @@
         return;
       }
 
-      // Start Ultraviolet
+      // Init UV
       const uv = new Ultraviolet(__uv$config);
       await uv.init();
 
+      // Create and insert iframe
       const iframe = document.createElement('iframe');
       iframe.id = 'uv-frame';
       document.body.appendChild(iframe);
 
+      // Start navigation
       uv.navigate(iframe, targetUrl);
     });
   </script>
