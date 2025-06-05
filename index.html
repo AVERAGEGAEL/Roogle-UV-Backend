@@ -19,6 +19,7 @@
   </style>
 </head>
 <body>
+  <!-- UV core files -->
   <script src="uv.bundle.js" defer></script>
   <script src="uv.config.js" defer></script>
   <script src="uv.handler.js" defer></script>
@@ -33,12 +34,23 @@
         return;
       }
 
+      // Wait for core files to load
       if (!window.__uv$config || typeof Ultraviolet === 'undefined') {
         document.body.innerHTML = '<h2>❗ Failed to load Ultraviolet core files.</h2>';
         return;
       }
 
-      // Initialize and start proxy
+      // Register service worker (required!)
+      try {
+        await navigator.serviceWorker.register('uv.sw.js', {
+          scope: __uv$config.prefix,
+        });
+      } catch (e) {
+        document.body.innerHTML = '<h2>❗ Failed to register service worker.</h2><pre>' + e + '</pre>';
+        return;
+      }
+
+      // Start Ultraviolet
       const uv = new Ultraviolet(__uv$config);
       await uv.init();
 
