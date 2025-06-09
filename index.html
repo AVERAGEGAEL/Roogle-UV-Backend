@@ -10,6 +10,13 @@
       padding: 0;
       height: 100%;
       overflow: hidden;
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     }
     #uv-frame {
       width: 100%;
@@ -19,7 +26,6 @@
   </style>
 </head>
 <body>
-  <!-- UV core files -->
   <script src="uv.bundle.js" defer></script>
   <script src="uv.config.js" defer></script>
   <script src="uv.handler.js" defer></script>
@@ -34,37 +40,48 @@
         return;
       }
 
-      // Wait until core files are loaded (give it a tiny delay to ensure window.Ultraviolet is available)
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // Check if browser supports service workers
+      // Check if service workers are supported
       if (!('serviceWorker' in navigator)) {
-        document.body.innerHTML = '<h2>❗ Service worker not supported in this browser.</h2>';
+        document.body.innerHTML = `
+          <h2>❗ Service worker not available.</h2>
+          <p>Your browser or this environment doesn’t allow service workers.</p>
+        `;
         return;
       }
 
-      // Register service worker (must be at root)
+      // Wait until UV config loads
       try {
-        await navigator.serviceWorker.register('/Roogle-UV-Backend/uv.sw.js', {
-          scope: __uv$config.prefix,
+        while (typeof Ultraviolet === 'undefined' || typeof __uv$config === 'undefined') {
+          await new Promise(r => setTimeout(r, 50));
+        }
+      } catch (err) {
+        document.body.innerHTML = '<h2>❗ Failed to load Ultraviolet core files.</h2>';
+        return;
+      }
+
+      // Register the service worker
+      try {
+        await navigator.serviceWorker.register(__uv$config.sw || '/uv.sw.js', {
+          scope: __uv$config.prefix || '/',
         });
       } catch (e) {
         document.body.innerHTML = '<h2>❗ Failed to register service worker.</h2><pre>' + e + '</pre>';
         return;
       }
 
-      // Start UV
+      // Start Ultraviolet
       try {
         const uv = new Ultraviolet(__uv$config);
         await uv.init();
 
         const iframe = document.createElement('iframe');
         iframe.id = 'uv-frame';
+        document.body.innerHTML = '';
         document.body.appendChild(iframe);
 
         uv.navigate(iframe, targetUrl);
       } catch (e) {
-        document.body.innerHTML = '<h2>❗ Failed to start Ultraviolet.</h2><pre>' + e + '</pre>';
+        document.body.innerHTML = '<h2>❗ Failed to initialize proxy.</h2><pre>' + e + '</pre>';
       }
     });
   </script>
