@@ -3,46 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Roogle UV Backend</title>
+  <title>Roogle UV Backend Proxy</title>
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-    #uv-frame { width: 100%; height: 100%; border: none; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #uv-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
+  <!-- UV core files -->
   <script src="uv.bundle.js" defer></script>
   <script src="uv.config.js" defer></script>
   <script src="uv.handler.js" defer></script>
 
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
-      const params = new URLSearchParams(location.search);
-      const targetUrl = params.get('url');
-      if (!targetUrl) return document.body.innerHTML = '<h2>❗ Missing ?url=</h2>';
+      const urlParams = new URLSearchParams(location.search);
+      const targetUrl = urlParams.get('url');
 
-      if (!window.__uv$config || typeof Ultraviolet === 'undefined') {
-        return document.body.innerHTML = '<h2>❗ Failed to load UV core files.</h2>';
+      if (!targetUrl) {
+        document.body.innerHTML = '<h2>❗ Missing <code>?url=</code> parameter.</h2>';
+        return;
       }
 
-      // ✔️ Only use SW if available
-      if ('serviceWorker' in navigator) {
-        try {
-          await Ultraviolet.sw.register();
-        } catch (e) {
-          return document.body.innerHTML = '<h2>❗ Failed to register service worker.</h2><pre>' + e + '</pre>';
-        }
-      } else {
-        return document.body.innerHTML = '<h2>❗ Service worker not supported in this browser.</h2>';
+      // Wait until core files are loaded (give it a tiny delay to ensure window.Ultraviolet is available)
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Check if browser supports service workers
+      if (!('serviceWorker' in navigator)) {
+        document.body.innerHTML = '<h2>❗ Service worker not supported in this browser.</h2>';
+        return;
       }
 
-      const uv = new Ultraviolet(__uv$config);
-      await uv.init();
+      // Register service worker (must be at root)
+      try {
+        await navigator.serviceWorker.register('/Roogle-UV-Backend/uv.sw.js', {
+          scope: __uv$config.prefix,
+        });
+      } catch (e) {
+        document.body.innerHTML = '<h2>❗ Failed to register service worker.</h2><pre>' + e + '</pre>';
+        return;
+      }
 
-      const iframe = document.createElement('iframe');
-      iframe.id = 'uv-frame';
-      document.body.appendChild(iframe);
+      // Start UV
+      try {
+        const uv = new Ultraviolet(__uv$config);
+        await uv.init();
 
-      uv.navigate(iframe, targetUrl);
+        const iframe = document.createElement('iframe');
+        iframe.id = 'uv-frame';
+        document.body.appendChild(iframe);
+
+        uv.navigate(iframe, targetUrl);
+      } catch (e) {
+        document.body.innerHTML = '<h2>❗ Failed to start Ultraviolet.</h2><pre>' + e + '</pre>';
+      }
     });
   </script>
 </body>
