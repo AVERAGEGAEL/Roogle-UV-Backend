@@ -26,9 +26,10 @@
   </style>
 </head>
 <body>
-  <script src="uv.bundle.js" defer></script>
-  <script src="uv.config.js" defer></script>
-  <script src="uv.handler.js" defer></script>
+  <!-- Updated script paths for GitHub Pages -->
+  <script src="/Roogle-UV-Backend/uv.bundle.js" defer></script>
+  <script src="/Roogle-UV-Backend/uv.config.js" defer></script>
+  <script src="/Roogle-UV-Backend/uv.handler.js" defer></script>
 
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
@@ -40,7 +41,6 @@
         return;
       }
 
-      // Check if service workers are supported
       if (!('serviceWorker' in navigator)) {
         document.body.innerHTML = `
           <h2>❗ Service worker not available.</h2>
@@ -49,7 +49,6 @@
         return;
       }
 
-      // Wait until UV config loads
       try {
         while (typeof Ultraviolet === 'undefined' || typeof __uv$config === 'undefined') {
           await new Promise(r => setTimeout(r, 50));
@@ -59,17 +58,15 @@
         return;
       }
 
-      // Register the service worker
       try {
-        await navigator.serviceWorker.register(__uv$config.sw || '/uv.sw.js', {
-          scope: __uv$config.prefix || '/',
+        await navigator.serviceWorker.register(__uv$config.sw, {
+          scope: __uv$config.prefix,
         });
       } catch (e) {
         document.body.innerHTML = '<h2>❗ Failed to register service worker.</h2><pre>' + e + '</pre>';
         return;
       }
 
-      // Start Ultraviolet
       try {
         const uv = new Ultraviolet(__uv$config);
         await uv.init();
