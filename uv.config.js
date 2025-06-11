@@ -1,5 +1,5 @@
 self.__uv$config = {
-  prefix: '/Roogle-UV-Backend/service/',
+  prefix: '/Roogle-UV-Backend/',
   bare: 'https://incog.dev/bare/',
   encodeUrl: Ultraviolet.codec.xor.encode,
   decodeUrl: Ultraviolet.codec.xor.decode,
