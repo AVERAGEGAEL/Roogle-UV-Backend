@@ -8,10 +8,10 @@
   <h1>Roogle UV Debug</h1>
   <div id="log"></div>
 
-  <!-- External UV files from CDN (you can later replace with your local ones if you prefer) -->
-  <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.config.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.handler.js"></script>
+  <!-- Use your hosted versions on GitHub Pages -->
+  <script src="/Roogle-UV-Backend/uv.bundle.js"></script>
+  <script src="/Roogle-UV-Backend/uv.config.js"></script>
+  <script src="/Roogle-UV-Backend/uv.handler.js"></script>
 
   <script>
     function log(msg) {
@@ -32,7 +32,7 @@
         return log('❗ Service workers not supported.');
       }
 
-      // Wait for Ultraviolet + config to load
+      // Wait for UV files to load
       for (let i = 0; i < 40; i++) {
         if (typeof Ultraviolet !== 'undefined' && typeof __uv$config !== 'undefined') break;
         await new Promise(r => setTimeout(r, 100));
@@ -41,7 +41,7 @@
       if (typeof Ultraviolet === 'undefined') return log('❗ Ultraviolet is still undefined');
       if (typeof __uv$config === 'undefined') return log('❗ __uv$config is still undefined');
 
-      log('Ultraviolet + config loaded.');
+      log('✅ Ultraviolet and config loaded.');
 
       try {
         const reg = await navigator.serviceWorker.register(__uv$config.sw, {
@@ -55,9 +55,9 @@
       let uv;
       try {
         uv = new Ultraviolet(__uv$config);
-        log('✅ Created UV instance');
+        log('✅ UV instance created');
       } catch (e) {
-        return log('❗ UV constructor error: ' + e);
+        return log('❗ Error creating Ultraviolet instance: ' + e);
       }
 
       if (typeof uv.init !== 'function') return log('❗ uv.init is not a function');
@@ -72,11 +72,11 @@
       const iframe = document.createElement('iframe');
       iframe.style = 'width:100%;height:80vh;border:none;';
       document.body.appendChild(iframe);
-      log('Iframe created');
+      log('✅ Iframe created');
 
       try {
         uv.navigate(iframe, targetUrl);
-        log('✅ UV navigating to ' + targetUrl);
+        log('✅ UV navigating to: ' + targetUrl);
       } catch (e) {
         log('❗ uv.navigate failed: ' + e);
       }
