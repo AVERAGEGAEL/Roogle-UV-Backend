@@ -1,55 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <title>Roogle UV Debug Proxy</title>
-</head>
+<head><meta charset="UTF-8"/><title>Roogle UV Debug Proxy</title></head>
 <body style="background:#111;color:#eee;font:16px sans-serif;padding:20px;">
   <h1>Roogle UV Debug</h1>
   <div id="log"></div>
 
-  <!-- Use your hosted versions on GitHub Pages -->
+  <script>
+    function log(msg, strong=false) {
+      console.log(msg);
+      const d = document.getElementById('log');
+      d.innerHTML += (strong?'<strong>':'') + msg + (strong?'</strong>':'') + '<br>';
+    }
+    log('🏁 Debug Starting…', true);
+  </script>
+
+  <!-- Try loading your hosted versions -->
   <script src="/Roogle-UV-Backend/uv.bundle.js"></script>
   <script src="/Roogle-UV-Backend/uv.config.js"></script>
   <script src="/Roogle-UV-Backend/uv.handler.js"></script>
 
   <script>
-    function log(msg) {
-      console.log(msg);
-      const d = document.getElementById('log');
-      d.innerHTML += msg + '<br>';
-    }
-
     window.addEventListener('load', async () => {
-      log('Page fully loaded');
+      log('✅ Page fully loaded');
 
       const targetUrl = new URLSearchParams(location.search).get('url');
       if (!targetUrl) return log('❗ Missing ?url parameter.');
 
-      log('Target URL: ' + targetUrl);
+      log('🌐 URL: ' + targetUrl);
+      log('🧩 SW support: ' + ('serviceWorker' in navigator));
 
-      if (!('serviceWorker' in navigator)) {
-        return log('❗ Service workers not supported.');
+      // allow script loading
+      await new Promise(res => setTimeout(res, 200));
+
+      if (typeof Ultraviolet === 'undefined') {
+        log('⚠️ Ultraviolet undefined — loading CDN fallback');
+
+        document.body.insertAdjacentHTML('beforeend', `
+          <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.bundle.js"></script>
+          <script src="https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.handler.js"></script>
+        `);
+
+        // wait again
+        for (let i = 0; i < 30; i++) {
+          if (typeof Ultraviolet !== 'undefined') break;
+          await new Promise(r => setTimeout(r, 100));
+        }
       }
 
-      // Wait for UV files to load
-      for (let i = 0; i < 40; i++) {
-        if (typeof Ultraviolet !== 'undefined' && typeof __uv$config !== 'undefined') break;
-        await new Promise(r => setTimeout(r, 100));
-      }
+      log('Ultraviolet defined? ' + (typeof Ultraviolet !== 'undefined'));
 
-      if (typeof Ultraviolet === 'undefined') return log('❗ Ultraviolet is still undefined');
-      if (typeof __uv$config === 'undefined') return log('❗ __uv$config is still undefined');
-
-      log('✅ Ultraviolet and config loaded.');
+      if (typeof __uv$config === 'undefined') {
+        log('❗ __uv$config is still undefined');
+        return;
+      } else log('✅ __uv$config loaded');
 
       try {
         const reg = await navigator.serviceWorker.register(__uv$config.sw, {
           scope: __uv$config.prefix,
         });
-        log('✅ Service worker registered: ' + reg.scope);
+        log('✅ SW registered: ' + reg.scope);
       } catch (e) {
-        return log('❗ Failed to register service worker: ' + e);
+        return log('❗ SW registration failed: ' + e);
       }
 
       let uv;
@@ -57,28 +68,28 @@
         uv = new Ultraviolet(__uv$config);
         log('✅ UV instance created');
       } catch (e) {
-        return log('❗ Error creating Ultraviolet instance: ' + e);
+        return log('❗ UV constructor error: ' + e);
       }
 
-      if (typeof uv.init !== 'function') return log('❗ uv.init is not a function');
+      if (typeof uv.init !== 'function') return log('❗ uv.init missing');
 
       try {
         await uv.init();
-        log('✅ UV initialized');
+        log('✅ uv.init() completed');
       } catch (e) {
-        return log('❗ uv.init failed: ' + e);
+        return log('❗ uv.init() failed: ' + e);
       }
 
       const iframe = document.createElement('iframe');
       iframe.style = 'width:100%;height:80vh;border:none;';
       document.body.appendChild(iframe);
-      log('✅ Iframe created');
+      log('✅ Iframe added');
 
       try {
         uv.navigate(iframe, targetUrl);
-        log('✅ UV navigating to: ' + targetUrl);
+        log('✅ Navigating to: ' + targetUrl);
       } catch (e) {
-        log('❗ uv.navigate failed: ' + e);
+        log('❗ uv.navigate() failed: ' + e);
       }
     });
   </script>
