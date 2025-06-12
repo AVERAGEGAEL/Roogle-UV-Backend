@@ -32,10 +32,8 @@
     log('🏁 Debug Starting…', true);
   </script>
 
-  <!-- ❌ Disable broken local UV bundle so CDN fallback loads instead -->
-  <!-- <script src="/Roogle-UV-Backend/uv.bundle.js"></script> -->
-
-  <!-- ✅ Keep config and handler (required even with CDN bundle) -->
+  <!-- Self-hosted UV files -->
+  <script src="/Roogle-UV-Backend/uv.bundle.js"></script>
   <script src="/Roogle-UV-Backend/uv.config.js"></script>
   <script src="/Roogle-UV-Backend/uv.handler.js"></script>
 
@@ -53,28 +51,53 @@
       log('🌐 URL: ' + targetUrl);
       log('🧩 SW support: ' + ('serviceWorker' in navigator));
 
-      // Wait for UV to load
-      await new Promise(res => setTimeout(res, 200));
+      // Wait for UV to load a bit
+      await new Promise(res => setTimeout(res, 300));
 
-      // If UV is still not defined, load from CDN
+      // If Ultraviolet is still undefined, load fallback
       if (typeof Ultraviolet === 'undefined') {
         log('⚠️ Ultraviolet undefined — loading fallback from CDN...');
+
         const cdnScripts = [
           "https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.bundle.js",
           "https://cdn.jsdelivr.net/gh/titaniumnetwork-dev/Ultraviolet-Node/public/uv.handler.js"
         ];
 
         for (const src of cdnScripts) {
-          const script = document.createElement("script");
-          script.src = src;
-          document.body.appendChild(script);
-          await new Promise(res => script.onload = res);
+          try {
+            log('⏳ Loading ' + src);
+            await new Promise((resolve, reject) => {
+              const script = document.createElement("script");
+              script.src = src;
+              script.onload = () => {
+                log('✅ Loaded ' + src);
+                resolve();
+              };
+              script.onerror = () => {
+                log('❌ Failed to load ' + src);
+                reject();
+              };
+              document.body.appendChild(script);
+            });
+          } catch (e) {
+            log('❌ Script error or blocked');
+            return;
+          }
         }
 
-        // Wait for UV to define
+        // Wait for UV global to be available
+        let found = false;
         for (let i = 0; i < 30; i++) {
-          if (typeof Ultraviolet !== 'undefined') break;
+          if (typeof Ultraviolet !== 'undefined') {
+            found = true;
+            break;
+          }
           await new Promise(r => setTimeout(r, 100));
+        }
+
+        if (!found) {
+          log('❗ Ultraviolet still undefined after loading CDN scripts');
+          return;
         }
       }
 
