@@ -32,8 +32,10 @@
     log('🏁 Debug Starting…', true);
   </script>
 
-  <!-- Your self-hosted UV files -->
-  <script src="/Roogle-UV-Backend/uv.bundle.js"></script>
+  <!-- ❌ Disable broken local UV bundle so CDN fallback loads instead -->
+  <!-- <script src="/Roogle-UV-Backend/uv.bundle.js"></script> -->
+
+  <!-- ✅ Keep config and handler (required even with CDN bundle) -->
   <script src="/Roogle-UV-Backend/uv.config.js"></script>
   <script src="/Roogle-UV-Backend/uv.handler.js"></script>
 
