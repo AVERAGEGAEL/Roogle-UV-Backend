@@ -6,5 +6,5 @@ self.__uv$config = {
   handler: '/Roogle-UV-Backend/uv.handler.js',
   bundle: '/Roogle-UV-Backend/uv.bundle.js',
   config: '/Roogle-UV-Backend/uv.config.js',
-  sw: '/Roogle-UV-Backend/uv.sw.js',
+  sw: "https://averagegael.github.io/Roogle-UV-Backend/uv.sw.js",
 };
